@@ -6,6 +6,8 @@ export default function ({ data }) {
   const d3Container = useRef(null);
 
   const drawChart = () => {
+    d3.selectAll("svg > *").remove();
+
     // Declare the chart dimensions and margins.
     const width = 928;
     const height = 500;
@@ -97,11 +99,20 @@ export default function ({ data }) {
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("d", line(data));
+
+    // Create tooltip container (in progress)
+    const tooltip = svg.append("g");
+    const path = tooltip
+      .selectAll("path")
+      .data([,])
+      .join("path")
+      .attr("fill", "white")
+      .attr("stroke", "black");
   };
 
   useEffect(() => {
     drawChart();
-  }, [d3Container.current]);
+  }, [d3Container.current, data]);
 
   return <svg id="lineChart" ref={d3Container} />;
 }
