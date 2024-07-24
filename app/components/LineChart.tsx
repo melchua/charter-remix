@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import styles from "./LineChart.module.css";
 
@@ -22,17 +22,21 @@ export default function ({ data }) {
 
     // Declare the y (vertical position) scale.
     const y = d3.scaleLinear(
-      [d3.min(data, (d) => d.close) || 0, d3.max(data, (d) => d.close) || 0],
+      [
+        d3.min(data, (d) => Number(d.close)) || 0,
+        d3.max(data, (d) => Number(d.close) + 5000) || 0,
+      ],
       [height - marginBottom, marginTop]
     );
 
+    // Shaded area beneath the line
     var area = d3
       .area()
       .x((p) => {
         return x(new Date(p.date));
       })
       .y0((p) => height - marginBottom)
-      .y1((p) => y(p.close));
+      .y1((p) => y(p.close - marginBottom));
 
     // Declare the line generator.
     const line = d3
@@ -79,41 +83,20 @@ export default function ({ data }) {
           .attr("y", 10)
           .attr("fill", "currentColor")
           .attr("text-anchor", "start")
-          .text("↑ Daily close ($)")
       );
 
     // fill it
     svg
       .append("path")
       .attr("fill", "lightsteelblue")
-      .attr("stroke", "steelblue")
+      // .attr("stroke", "steelblue")
       .attr("d", area(data));
 
-    // Append a path for the line.
-    // svg
-    //   .append("path")
-    //   .attr("fill", "none")
-    //   .attr("stroke", "steelblue")
-    //   .attr("stroke-width", 1)
-    //   .attr("d", line(data));
-
-    // // Bind D3 data
-    // const update = svg.append("g").selectAll("text").data(data);
-
-    // // Enter new D3 elements
-    // update
-    //   .enter()
-    //   .append("text")
-    //   .attr("x", (d, i) => i * 50)
-    //   .attr("y", 60)
-    //   .style("font-size", 10)
-    //   .text((d: number) => `HAA${d}`);
-
-    // // Update existing D3 elements
-    // update.attr("x", (d, i) => i * 40).text((d: number) => d);
-
-    // // Remove old D3 elements
-    // update.exit().remove();
+    svg
+      .append("path")
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("d", line(data));
   };
 
   useEffect(() => {

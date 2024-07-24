@@ -2,3 +2,8 @@
   fill: lightsteelblue;
   stroke-width: 0;
 }
+
+.periodControl {
+  display: flex;
+  gap: 4px;
+}
