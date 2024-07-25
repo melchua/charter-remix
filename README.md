@@ -2,7 +2,7 @@
 
 I wanted to explore using D3 for the first time. The API I decided to use was Yahoo finance through the yahoofinance2 npm package. This package has to be run on a Node server, so rather than creating a separate Node server, I opted to use Remix for that all-in-one experience.
 
-![Loom](https://www.loom.com/embed/08a6c99dfa9b4514b10a46c4d1fbe5d8?sid=5217cdc9-4110-4d5d-a5a7-99895562d5d6)
+[Loom](https://www.loom.com/share/08a6c99dfa9b4514b10a46c4d1fbe5d8?sid=b1f21112-6a11-47d3-af77-bd704c1dcc14)
 
 ## Stack
 
