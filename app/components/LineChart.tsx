@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import { bisector } from "d3-array"; // Import bisector from d3-array
 import { USDollar } from "~/utils/quoteUtils";
@@ -40,7 +40,7 @@ export default function ({ data }) {
         return x(new Date(p.date));
       })
       .y0((p) => height - marginBottom)
-      .y1((p) => y(p.close - marginBottom));
+      .y1((p) => y(p.close)); // 0.1 is a hack for this
 
     // Declare the line generator.
     const line = d3
@@ -143,6 +143,7 @@ export default function ({ data }) {
           .attr("text-anchor", "start")
       );
 
+    // Removing fill for now
     // fill it
     svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
 

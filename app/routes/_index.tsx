@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type {
   MetaFunction,
   LoaderFunctionArgs,
@@ -7,22 +8,27 @@ import { useLoaderData, useFetcher } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import LineChart from "../components/LineChart";
 import yahooFinance from "yahoo-finance2";
+import { USDollar } from "../utils/quoteUtils";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Bitcoin Charter" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Charter Remix" },
+    { name: "description", content: "Charts stock symbols" },
   ];
 };
 
+const DEFAULT_TICKER = "BTC-USD";
+const DEFAULT_PERIOD = "oneyear";
+
 const getTickerData = async ({
-  period,
+  period = DEFAULT_PERIOD,
+  ticker = DEFAULT_TICKER,
   today,
 }: {
-  period: string;
+  period?: string;
   today: Date;
+  ticker: string;
 }) => {
-  const ticker = "BTC-USD";
   const periodToDate = {
     "24hours": () => {
       return new Date(
@@ -65,6 +71,7 @@ const getTickerData = async ({
     period1: periodToDate[period as keyof typeof periodToDate](),
     period2: today,
   };
+
   const result = await yahooFinance.chart(ticker, queryOptions);
   return result;
 };
@@ -72,13 +79,8 @@ const getTickerData = async ({
 export const loader = async ({
   request,
 }: LoaderFunctionArgs & { query: string }) => {
-  // TODO: FIX AND DRY THIS LATER
-  // const today = new Date();
-  // const DEFAULTPERIOD = "fiveyears";
-  // const result = getTickerData({ period: DEFAULTPERIOD, today });
-  // return json(result);
   const today = new Date();
-  const ticker = "BTC-USD";
+  const ticker = DEFAULT_TICKER;
   const queryOptions = {
     period1: new Date(
       today.getFullYear() - 1,
@@ -93,15 +95,22 @@ export const loader = async ({
 
 export async function action({ request }: ActionFunctionArgs) {
   const today = new Date();
-  const { period } = await request.json();
-  const updatedData = await getTickerData({ period, today });
-  return json(updatedData);
+  const formData = await request.formData();
+  const ticker = formData.get("ticker");
+  const period = formData.get("period");
+  try {
+    const updatedData = await getTickerData({
+      ticker,
+      period,
+      today,
+    });
+    return json(updatedData);
+  } catch {
+    console.log("error");
+    return null;
+    // throw new Error("Failed to fetch ticker data");
+  }
 }
-// Format the price above to USD using the locale, style, and currency.
-let USDollar = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
 
 export default function Index() {
   const initialData = useLoaderData<typeof loader>();
@@ -112,7 +121,18 @@ export default function Index() {
   const change = quotes[0].close
     ? (((currentClose - quotes[0].close) / quotes[0].close) * 100).toFixed(2)
     : null;
+  const formRef = useRef<HTMLFormElement>(null);
 
+  useEffect(() => {
+    if (fetcher.state === "submitting") {
+      formRef.current?.reset();
+      // taskInputRef.current
+    }
+  }, [fetcher.state]);
+
+  const symbol = fetcher.data
+    ? fetcher.data?.meta.symbol
+    : initialData.meta.symbol;
   const priceArray = quotes.map((quote) => {
     return Number(quote.close);
   });
@@ -124,20 +144,28 @@ export default function Index() {
   const high = priceArray.at(-1);
   const low = priceArray[1];
 
-  const handleClickPeriod = ({ period }: { period: string }) => {
-    fetcher.submit(
-      { period },
-      {
-        method: "POST",
-        encType: "application/json",
-      }
-    );
-  };
-
   return (
     <div className="font-sans bg-slate-50 m-8 flex flex-col justify-center p-8 rounded-md">
+      <fetcher.Form method="POST" ref={formRef} className="pb-4">
+        <input type="hidden" name="period" value={DEFAULT_PERIOD} />
+        <input
+          type="text"
+          id="ticker"
+          name="ticker"
+          placeholder="Search for symbols"
+          className="bg-slate-200 w-30 mr-3 ml-0 p-1 pl-2 rounded-md"
+        />
+        <button
+          type="submit"
+          name="formName"
+          value="tickerUpdateForm"
+          className="hover:bg-sky-100 hover:rounded-lg hover:scale-125"
+        >
+          🔎
+        </button>
+      </fetcher.Form>
       <div>
-        <h1 className="text-3xl ">Bitcoin Price (BTC)</h1>
+        <h1 className="text-3xl ">{symbol}</h1>
         <span className="text-2xl pt-1 pr-2">
           {USDollar.format(currentClose)}
         </span>
@@ -155,32 +183,37 @@ export default function Index() {
           <div className="text-xs">{USDollar.format(low)}</div>
         </div>
       </div>
+      <fetcher.Form method="POST">
+        <div className="flex gap-2">
+          <input type="hidden" name="formName" value={"periodUpdateForm"} />
+          <input type="hidden" name="ticker" value={symbol} />
+          <button
+            type="submit"
+            name="period"
+            value="onemonth"
+            className={`{hover:text-cyan-700}`}
+          >
+            1M
+          </button>
 
-      <div className="flex gap-2">
-        <button
-          name="period"
-          className={`{hover:text-cyan-700}`}
-          onClick={() => handleClickPeriod({ period: "onemonth" })}
-        >
-          1M
-        </button>
-        <button
-          name="period"
-          className={"hover:text-cyan-700"}
-          onClick={() => handleClickPeriod({ period: "oneyear" })}
-        >
-          1Y
-        </button>
-        <button
-          name="period"
-          className={"hover:text-cyan-700"}
-          onClick={() => handleClickPeriod({ period: "fiveyears" })}
-        >
-          5Y
-        </button>
-      </div>
+          <button
+            name="period"
+            value="oneyear"
+            className={"hover:text-cyan-700"}
+          >
+            1Y
+          </button>
+          <button
+            name="period"
+            value="fiveyears"
+            className={"hover:text-cyan-700"}
+          >
+            5Y
+          </button>
+        </div>
+      </fetcher.Form>
+
       <LineChart data={quotes} />
     </div>
   );
 }
-``;
