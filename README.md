@@ -17,6 +17,7 @@ I wanted to explore using D3 for the first time. The API I decided to use was Ya
 - Currently just made for the desktop browser - next up is to make this responsive for mobile devices
 - Add some error boundaries
 - Add transition animations between charts
+- Add cross-hairs to track cursor position on the chart
 
 ## Development
 
