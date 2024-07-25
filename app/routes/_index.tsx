@@ -63,7 +63,7 @@ const getTickerData = async ({
 
   const queryOptions = {
     period1: periodToDate[period as keyof typeof periodToDate](),
-    period2: today /* ... */,
+    period2: today,
   };
   const result = await yahooFinance.chart(ticker, queryOptions);
   return result;
@@ -85,7 +85,7 @@ export const loader = async ({
       today.getMonth(),
       today.getDate()
     ),
-    period2: today /* ... */,
+    period2: today,
   };
   const result = await yahooFinance.chart(ticker, queryOptions);
   return json(result);
@@ -107,12 +107,6 @@ export default function Index() {
   const initialData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const quotes = fetcher.data ? fetcher.data.quotes : initialData.quotes;
-
-  // Change
-  // Layout
-
-  console.log("fetcher.data ", fetcher.data);
-  console.log("quotes[0].close", quotes[0].close);
   const currentQuote = quotes.at(-1);
   const currentClose = currentQuote?.close ?? 0; // need a better solution here, keep for now
   const change = quotes[0].close
@@ -128,7 +122,7 @@ export default function Index() {
   });
 
   const high = priceArray.at(-1);
-  const low = priceArray[0];
+  const low = priceArray[1];
 
   const handleClickPeriod = ({ period }: { period: string }) => {
     fetcher.submit(
@@ -141,7 +135,7 @@ export default function Index() {
   };
 
   return (
-    <div className="font-mono bg-slate-50 m-8 flex flex-col justify-center p-8 rounded-md">
+    <div className="font-sans bg-slate-50 m-8 flex flex-col justify-center p-8 rounded-md">
       <div>
         <h1 className="text-3xl ">Bitcoin Price (BTC)</h1>
         <span className="text-2xl pt-1 pr-2">
@@ -165,7 +159,7 @@ export default function Index() {
       <div className="flex gap-2">
         <button
           name="period"
-          className={`hover:text-cyan-700`}
+          className={`{hover:text-cyan-700}`}
           onClick={() => handleClickPeriod({ period: "onemonth" })}
         >
           1M

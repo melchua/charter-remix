@@ -58,14 +58,39 @@ export default function ({ data }) {
         .style("display", "block");
 
       tooltip
-        .append("text")
-        .text(`${USDollar.format(data[i].close)}`)
+        .append("rect")
+        .attr("width", 120)
+        .attr("height", 75)
+        .attr("r", 50)
+        .attr("fill", "white")
+        .attr("opacity", "0.76")
+        .attr("rx", "4")
         .attr(
           "transform",
           `translate(${x(new Date(data[i].date))}, ${y(
             new Date(data[i].close)
           )})`
         );
+
+      const textGroup = tooltip.append("g");
+      const date = new Date(data[i].date);
+
+      textGroup
+        .append("text")
+        .text(`${USDollar.format(data[i].close)}`)
+        .attr("x", x(new Date(data[i].date)) + 20)
+        .attr("y", y(new Date(data[i].close)) + 28)
+        .style("fill", "black")
+        .style("font", "16px sans-serif")
+        .style("font-weight", "bold");
+
+      textGroup
+        .append("text")
+        .text(`${date.toLocaleDateString("en-US")}`)
+        .attr("x", x(new Date(data[i].date)) + 28)
+        .attr("y", y(new Date(data[i].close)) + 56)
+        .style("fill", "black")
+        .style("font", "14px sans-serif");
     };
 
     const pointerleft = () => {
@@ -78,9 +103,13 @@ export default function ({ data }) {
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
-      .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+      .attr(
+        "style",
+        "max-width: 100%; height: auto; height: intrinsic; min-height: 500px; min-width: 700px; overflow: visible;"
+      )
       .on("pointerenter pointermove", pointermoved)
       .on("pointerleave", pointerleft);
+
     // Add the x-axis.
     svg
       .append("g")
