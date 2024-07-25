@@ -108,14 +108,27 @@ export default function Index() {
   const fetcher = useFetcher<typeof action>();
   const quotes = fetcher.data ? fetcher.data.quotes : initialData.quotes;
 
+  // Change
+  // Layout
+
+  console.log("fetcher.data ", fetcher.data);
+  console.log("quotes[0].close", quotes[0].close);
   const currentQuote = quotes.at(-1);
   const currentClose = currentQuote?.close ?? 0; // need a better solution here, keep for now
-  const currentOpen = currentQuote?.open ?? 0;
-  const change = (((currentClose - currentOpen) / currentOpen) * 100).toFixed(
-    2
-  );
-  const high = currentQuote?.high || 0;
-  const low = currentQuote?.low || 0;
+  const change = quotes[0].close
+    ? (((currentClose - quotes[0].close) / quotes[0].close) * 100).toFixed(2)
+    : null;
+
+  const priceArray = quotes.map((quote) => {
+    return Number(quote.close);
+  });
+
+  priceArray.sort((a, b) => {
+    return a - b;
+  });
+
+  const high = priceArray.at(-1);
+  const low = priceArray[0];
 
   const handleClickPeriod = ({ period }: { period: string }) => {
     fetcher.submit(
@@ -128,48 +141,45 @@ export default function Index() {
   };
 
   return (
-    <div className="font-mono p-4">
-      <h1>BIT-COIN USD</h1>
-      <h2>{USDollar.format(currentClose)}</h2>
-      <p>{change}%</p>
+    <div className="font-mono bg-slate-50 m-8 flex flex-col justify-center p-8 rounded-md">
       <div>
-        <div>High</div>
-        <div>{USDollar.format(high)}</div>
-        <div>Low</div>
-        <div>{USDollar.format(low)}</div>
+        <h1 className="text-3xl ">Bitcoin Price (BTC)</h1>
+        <span className="text-2xl pt-1 pr-2">
+          {USDollar.format(currentClose)}
+        </span>
+        <span className={`${change >= 0 ? "text-green-500" : "text-red-500"}`}>
+          {change}%
+        </span>
       </div>
-      <div>
+      <div className="flex justify-end gap-4 mr-7">
+        <div className="p-1">
+          <header className="text-sm">High</header>
+          <div className="text-xs">{USDollar.format(high)}</div>
+        </div>
+        <div className="p-1">
+          <header className="text-sm">Low</header>
+          <div className="text-xs">{USDollar.format(low)}</div>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
         <button
           name="period"
-          className={"text-cyan-700 hover:text-cyan-400"}
-          onClick={() => handleClickPeriod({ period: "24hours" })}
-        >
-          24H
-        </button>
-        <button
-          name="period"
-          className={"text-cyan-700 hover:text-cyan-400"}
-          onClick={() => handleClickPeriod({ period: "oneweek" })}
-        >
-          1W
-        </button>
-        <button
-          name="period"
-          className={"text-cyan-700 hover:text-cyan-400"}
+          className={`hover:text-cyan-700`}
           onClick={() => handleClickPeriod({ period: "onemonth" })}
         >
           1M
         </button>
         <button
           name="period"
-          className={"text-cyan-700 hover:text-cyan-400"}
+          className={"hover:text-cyan-700"}
           onClick={() => handleClickPeriod({ period: "oneyear" })}
         >
           1Y
         </button>
         <button
           name="period"
-          className={"text-cyan-700 hover:text-cyan-400"}
+          className={"hover:text-cyan-700"}
           onClick={() => handleClickPeriod({ period: "fiveyears" })}
         >
           5Y
@@ -179,3 +189,4 @@ export default function Index() {
     </div>
   );
 }
+``;

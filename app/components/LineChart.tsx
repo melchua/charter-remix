@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import styles from "./LineChart.module.css";
+import { bisector } from "d3-array"; // Import bisector from d3-array
+import { USDollar } from "~/utils/quoteUtils";
 
 export default function ({ data }) {
   const d3Container = useRef(null);
+  const bisect = bisector((d: { date: string }) => new Date(d.date)).left;
 
   const drawChart = () => {
     d3.selectAll("svg > *").remove();
 
     // Declare the chart dimensions and margins.
-    const width = 928;
+    const width = 1000;
     const height = 500;
     const marginTop = 20;
     const marginRight = 30;
@@ -26,7 +28,7 @@ export default function ({ data }) {
     const y = d3.scaleLinear(
       [
         d3.min(data, (d) => Number(d.close)) || 0,
-        d3.max(data, (d) => Number(d.close) + 5000) || 0,
+        d3.max(data, (d) => Number(d.close)) || 0,
       ],
       [height - marginBottom, marginTop]
     );
@@ -46,14 +48,39 @@ export default function ({ data }) {
       .x((d) => x(new Date(d.date))) // Convert date string to Date object
       .y((d) => y(d.close));
 
+    // Events
+    const pointermoved = (event) => {
+      svg.selectAll("#tooltip").remove(); // Remove existing tooltip
+      const i = bisect(data, x.invert(d3.pointer(event)[0]));
+      const tooltip = svg
+        .append("g")
+        .attr("id", "tooltip")
+        .style("display", "block");
+
+      tooltip
+        .append("text")
+        .text(`${USDollar.format(data[i].close)}`)
+        .attr(
+          "transform",
+          `translate(${x(new Date(data[i].date))}, ${y(
+            new Date(data[i].close)
+          )})`
+        );
+    };
+
+    const pointerleft = () => {
+      svg.selectAll("#tooltip").remove();
+    };
+
     // Create the SVG container.
     const svg = d3
       .select(d3Container.current)
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height])
-      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
-
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+      .on("pointerenter pointermove", pointermoved)
+      .on("pointerleave", pointerleft);
     // Add the x-axis.
     svg
       .append("g")
@@ -88,26 +115,13 @@ export default function ({ data }) {
       );
 
     // fill it
-    svg
-      .append("path")
-      .attr("fill", "lightsteelblue")
-      // .attr("stroke", "steelblue")
-      .attr("d", area(data));
+    svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
 
     svg
       .append("path")
       .attr("fill", "none")
       .attr("stroke", "steelblue")
       .attr("d", line(data));
-
-    // Create tooltip container (in progress)
-    const tooltip = svg.append("g");
-    const path = tooltip
-      .selectAll("path")
-      .data([,])
-      .join("path")
-      .attr("fill", "white")
-      .attr("stroke", "black");
   };
 
   useEffect(() => {
