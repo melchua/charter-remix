@@ -1,6 +1,11 @@
-# Welcome to Remix!
+# Charter-Remix!
 
-- 📖 [Remix docs](https://remix.run/docs)
+I wanted to explore using D3 for the first time. The API I decided to use was Yahoo finance through the yahoofinance2 npm package. This package has to be run on a Node server, so rather than creating a separate Node server, I opted to use Remix for that all-in-one experience.
+
+## Stack
+
+- Remix / React
+- D3
 
 ## Development
 

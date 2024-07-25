@@ -10,7 +10,7 @@ export default function ({ data }) {
   const drawChart = () => {
     d3.selectAll("svg > *").remove();
 
-    // Declare the chart dimensions and margins.
+    // Chart dimensions and margins.
     const width = 1000;
     const height = 500;
     const marginTop = 20;
@@ -24,7 +24,7 @@ export default function ({ data }) {
       width - marginRight,
     ]);
 
-    // Declare the y (vertical position) scale.
+    // Y scale
     const y = d3.scaleLinear(
       [
         d3.min(data, (d) => Number(d.close)) || 0,
@@ -42,14 +42,14 @@ export default function ({ data }) {
       .y0((p) => height - marginBottom)
       .y1((p) => y(p.close)); // 0.1 is a hack for this
 
-    // Declare the line generator.
+    // Line generator function
     const line = d3
-      .line<{ date: string; close: number }>() // Explicitly type the data
-      .x((d) => x(new Date(d.date))) // Convert date string to Date object
+      .line<{ date: string; close: number }>()
+      .x((d) => x(new Date(d.date)))
       .y((d) => y(d.close));
 
-    // Events
-    const pointermoved = (event) => {
+    // Used to show individual stock info tooltip when hoving over chart
+    const pointermoved = (event: MouseEvent) => {
       svg.selectAll("#tooltip").remove(); // Remove existing tooltip
       const i = bisect(data, x.invert(d3.pointer(event)[0]));
       const tooltip = svg
@@ -97,7 +97,7 @@ export default function ({ data }) {
       svg.selectAll("#tooltip").remove();
     };
 
-    // Create the SVG container.
+    // Create the main SVG chart container.
     const svg = d3
       .select(d3Container.current)
       .attr("width", width)
@@ -143,8 +143,7 @@ export default function ({ data }) {
           .attr("text-anchor", "start")
       );
 
-    // Removing fill for now
-    // fill it
+    // Shading underneath the chart line
     svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
 
     svg

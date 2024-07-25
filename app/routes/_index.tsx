@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   MetaFunction,
   LoaderFunctionArgs,
@@ -107,8 +107,8 @@ export async function action({ request }: ActionFunctionArgs) {
     return json(updatedData);
   } catch {
     console.log("error");
+    // Suppressing errors for this demo
     return null;
-    // throw new Error("Failed to fetch ticker data");
   }
 }
 
@@ -122,6 +122,7 @@ export default function Index() {
     ? (((currentClose - quotes[0].close) / quotes[0].close) * 100).toFixed(2)
     : null;
   const formRef = useRef<HTMLFormElement>(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(DEFAULT_PERIOD);
 
   useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -192,6 +193,9 @@ export default function Index() {
             name="period"
             value="onemonth"
             className={`{hover:text-cyan-700}`}
+            onClick={() => {
+              setSelectedPeriod("onemonth");
+            }}
           >
             1M
           </button>
@@ -200,6 +204,9 @@ export default function Index() {
             name="period"
             value="oneyear"
             className={"hover:text-cyan-700"}
+            onClick={() => {
+              setSelectedPeriod("oneyear");
+            }}
           >
             1Y
           </button>
@@ -207,6 +214,9 @@ export default function Index() {
             name="period"
             value="fiveyears"
             className={"hover:text-cyan-700"}
+            onClick={() => {
+              setSelectedPeriod("fiveyears");
+            }}
           >
             5Y
           </button>
