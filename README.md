@@ -7,6 +7,13 @@ I wanted to explore using D3 for the first time. The API I decided to use was Ya
 - Remix / React
 - D3
 
+## Future improvements
+
+- Selecting time periods should indicate which is currently selected
+- Currently just made for the desktop browser - next up is to make this responsive for mobile devices
+- Add some error boundaries
+- Add transition animations between charts
+
 ## Development
 
 Run the dev server:
@@ -18,6 +25,7 @@ npm run dev
 ## Deployment
 
 First, build your app for production:
+`
 
 ```sh
 npm run build
