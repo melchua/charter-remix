@@ -40,7 +40,7 @@ export default function ({ data }) {
         return x(new Date(p.date));
       })
       .y0((p) => height - marginBottom)
-      .y1((p) => y(p.close)); // 0.1 is a hack for this
+      .y1((p) => y(p.close + 0.1)); // 0.1 is a hack for this
 
     // Line generator function
     const line = d3
@@ -144,7 +144,7 @@ export default function ({ data }) {
       );
 
     // Shading underneath the chart line
-    // svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
+    svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
 
     svg
       .append("path")

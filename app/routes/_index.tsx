@@ -115,7 +115,14 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function Index() {
   const initialData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
-  const quotes = fetcher.data ? fetcher.data.quotes : initialData.quotes;
+  const quotesRaw = fetcher.data ? fetcher.data.quotes : initialData.quotes;
+
+  // We get bad data from the Yahoo scraper sometimes, with null prices
+  // for this demo we'll clear those bad dates out
+  const quotes = quotesRaw.filter((q) => {
+    return q.close !== null;
+  });
+
   const currentQuote = quotes.at(-1);
   const currentClose = currentQuote?.close ?? 0; // need a better solution here, keep for now
   const change = quotes[0].close
