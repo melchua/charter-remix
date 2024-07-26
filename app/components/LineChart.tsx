@@ -144,7 +144,7 @@ export default function ({ data }) {
       );
 
     // Shading underneath the chart line
-    svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
+    // svg.append("path").attr("fill", "lightsteelblue").attr("d", area(data));
 
     svg
       .append("path")
